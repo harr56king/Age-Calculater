@@ -1,0 +1,134 @@
+document.addEventListener('DOMContentLoaded', function() {
+    const birthdateInput = document.getElementById('birthdate');
+    const currentDateInput = document.getElementById('current-date');
+    const calculationMethod = document.getElementById('calculation-method');
+    const calculateBtn = document.getElementById('calculate-btn');
+    const ageOutput = document.getElementById('age-output');
+    const resultContainer = document.getElementById('result');
+
+    // Set default dates (current date and a date 20 years ago)
+    const today = new Date();
+    currentDateInput.valueAsDate = today;
+    const defaultBirthdate = new Date();
+    defaultBirthdate.setFullYear(today.getFullYear() - 20);
+    birthdateInput.valueAsDate = defaultBirthdate;
+
+    calculateBtn.addEventListener('click', calculateAge);
+
+    function calculateAge() {
+        const birthdate = new Date(birthdateInput.value);
+        const currentDate = new Date(currentDateInput.value);
+        
+        if (!birthdateInput.value || !currentDateInput.value) {
+            alert('Please enter both dates');
+            return;
+        }
+        
+        if (birthdate > currentDate) {
+            alert('Birthdate cannot be in the future');
+            return;
+        }
+        
+        const method = calculationMethod.value;
+        let result;
+        
+        if (method === 'western') {
+            result = calculateWesternAge(birthdate, currentDate);
+        } else {
+            result = calculateChineseAge(birthdate, currentDate);
+        }
+        
+        displayResult(result, method);
+    }
+
+    function calculateWesternAge(birthdate, currentDate) {
+        let years = currentDate.getFullYear() - birthdate.getFullYear();
+        let months = currentDate.getMonth() - birthdate.getMonth();
+        let days = currentDate.getDate() - birthdate.getDate();
+        
+        // Adjust for negative months or days
+        if (months < 0 || (months === 0 && days < 0)) {
+            years--;
+            months += 12;
+        }
+        
+        if (days < 0) {
+            const lastMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, birthdate.getDate());
+            const daysInLastMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 0).getDate();
+            days = Math.floor((currentDate - lastMonth) / (1000 * 60 * 60 * 24));
+            if (days < 0) days += daysInLastMonth;
+            months--;
+        }
+        
+        return { years, months, days };
+    }
+
+    function calculateChineseAge(birthdate, currentDate) {
+        // In traditional Chinese age system:
+        // 1. Person is born at age 1
+        // 2. Age increases at Chinese New Year
+        
+        // First calculate the western age
+        const westernAge = calculateWesternAge(birthdate, currentDate);
+        let years = westernAge.years + 1; // Add 1 because born at age 1
+        
+        // Check if Chinese New Year has passed in the current year
+        const chineseNewYear = getChineseNewYear(currentDate.getFullYear());
+        const currentYearNewYear = new Date(chineseNewYear);
+        
+        // If current date is before Chinese New Year, subtract 1 year
+        if (currentDate < currentYearNewYear) {
+            years--;
+        }
+        
+        // For months and days, we'll just use the western calculation
+        // (Note: Traditional Chinese system typically doesn't use months/days for age)
+        return { 
+            years, 
+            months: westernAge.months, 
+            days: westernAge.days 
+        };
+    }
+
+    function getChineseNewYear(year) {
+        // Simplified approximation - actual Chinese New Year dates vary
+        // This uses the most common dates from 2000-2030
+        const newYearDates = {
+            2000: '2000-02-05', 2001: '2001-01-24', 2002: '2002-02-12', 2003: '2003-02-01',
+            2004: '2004-01-22', 2005: '2005-02-09', 2006: '2006-01-29', 2007: '2007-02-18',
+            2008: '2008-02-07', 2009: '2009-01-26', 2010: '2010-02-14', 2011: '2011-02-03',
+            2012: '2012-01-23', 2013: '2013-02-10', 2014: '2014-01-31', 2015: '2015-02-19',
+            2016: '2016-02-08', 2017: '2017-01-28', 2018: '2018-02-16', 2019: '2019-02-05',
+            2020: '2020-01-25', 2021: '2021-02-12', 2022: '2022-02-01', 2023: '2023-01-22',
+            2024: '2024-02-10', 2025: '2025-01-29', 2026: '2026-02-17', 2027: '2027-02-06',
+            2028: '2028-01-26', 2029: '2029-02-13', 2030: '2030-02-03'
+        };
+        
+        if (newYearDates[year]) {
+            return newYearDates[year];
+        }
+        
+        // Fallback approximation (January 21 - February 20)
+        return `${year}-02-01`;
+    }
+
+    function displayResult(result, method) {
+        let output = '';
+        
+        if (method === 'western') {
+            output = `
+                <p><strong>Age:</strong> ${result.years} years, ${result.months} months, ${result.days} days</p>
+                <p>In the Western age system, your age increases on your birthday.</p>
+            `;
+        } else {
+            output = `
+                <p><strong>Age:</strong> ${result.years} years</p>
+                <p>In the traditional Chinese age system, you are born at age 1 and your age increases at the Chinese New Year.</p>
+                <p>Note: The months and days are calculated using the Western method as traditional Chinese age typically doesn't use them.</p>
+            `;
+        }
+        
+        ageOutput.innerHTML = output;
+        resultContainer.style.display = 'block';
+    }
+});

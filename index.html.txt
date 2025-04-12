@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Age Calculator</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="calculator-container">
+        <h1>Age Calculator</h1>
+        
+        <div class="input-group">
+            <label for="birthdate">Birthdate:</label>
+            <input type="date" id="birthdate" required>
+        </div>
+        
+        <div class="input-group">
+            <label for="current-date">Current Date:</label>
+            <input type="date" id="current-date" required>
+        </div>
+        
+        <div class="input-group">
+            <label for="calculation-method">Age Calculation Method:</label>
+            <select id="calculation-method">
+                <option value="western">Western (age increases on birthday)</option>
+                <option value="chinese">Traditional Chinese (age increases at New Year)</option>
+            </select>
+        </div>
+        
+        <button id="calculate-btn">Calculate Age</button>
+        
+        <div id="result" class="result-container">
+            <h2>Age Result</h2>
+            <div id="age-output"></div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
